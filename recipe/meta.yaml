@@ -12,28 +12,33 @@ source:
 
 build:
   number: 0
-  noarch: python
-  script: {{ PYTHON }} -m pip install . -vv
+  skip: true  # [py<39]
 
 requirements:
+  build:
+    - {{ compiler('c') }}
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}      # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
   host:
+    - python
     - pip
-    - python {{ python_min }}
-    - numpy >=1.17
-    - typing-extensions
+    - setuptools >=64
+    - numpy >=2.1
   run:
-    - numpy >=1.17
-    - python >={{ python_min }}
-    - typing-extensions
+    - python >=3.9
+    - numpy >=2.1
+    - typing_extensions
 
 test:
   source_files:
     - test
   imports:
     - tafra
-    - test
+    - tafra._accel
   commands:
     - pip check
+    - python -c "from tafra._accel import groupby_sum; print('C extension OK')"
     - pytest --cov=tafra --cov-report=term-missing --hypothesis-show-statistics -v test
   requires:
     - pip
@@ -41,17 +46,20 @@ test:
     - hypothesis
     - pytest-cov
     - pandas
-    - python {{ python_min }}
 
 about:
   home: https://github.com/petbox-dev/tafra
-  summary: 'Tafra: innards of a dataframe'
   license: MIT
+  license_family: MIT
   license_file: LICENSE
-  description: A minimalist typed dataframe with functional programming concepts.
-  doc_url: https://tafra.readthedocs.io
+  summary: "Tafra: innards of a dataframe"
+  description: |
+    A minimalist Python dataframe library — a lightweight alternative to
+    pandas backed by numpy arrays. Provides SQL-style group-by, transform,
+    and join operations with optional C acceleration for single-pass
+    aggregation and hash-based equi-joins.
+  doc_url: https://tafra.readthedocs.io/
   dev_url: https://github.com/petbox-dev/tafra
-
 
 extra:
   recipe-maintainers:
