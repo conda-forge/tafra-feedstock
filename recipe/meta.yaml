@@ -8,15 +8,17 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  # sha256 will be filled by conda-forge bot after PyPI upload
+  sha256: 7c0ef143b4185d148853e57d304b12c5a8743da29dfe50b20a966cf39a84e73d
 
 build:
   number: 0
   skip: true  # [py<39]
+  script: {{ PYTHON }} -m pip install . -vv
 
 requirements:
   build:
     - {{ compiler('c') }}
+    - {{ stdlib("c") }}
     - python                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}      # [build_platform != target_platform]
     - numpy                                  # [build_platform != target_platform]
@@ -26,7 +28,7 @@ requirements:
     - setuptools >=64
     - numpy >=2.1
   run:
-    - python >=3.9
+    - python
     - numpy >=2.1
     - typing_extensions
 
